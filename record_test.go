@@ -80,7 +80,7 @@ func TestSchemaRecordFieldWithDefaults(t *testing.T) {
 }
 
 func TestRecordDecodedEmptyBuffer(t *testing.T) {
-	testBinaryDecodeFailBufferUnderflow(t, `{"type":"record","name":"foo","fields":[{"name":"field1","type":"int"}]}`, nil)
+	testBinaryDecodeFailShortBuffer(t, `{"type":"record","name":"foo","fields":[{"name":"field1","type":"int"}]}`, nil)
 }
 
 func TestRecordFieldTypeHasPrimitiveName(t *testing.T) {

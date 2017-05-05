@@ -22,7 +22,7 @@ func makeArrayCodec(st map[string]*Codec, enclosingNamespace string, schemaMap m
 			var value interface{}
 			var err error
 
-			if value, buf, err = longDecoder(buf); err != nil {
+			if value, buf, err = longBinaryDecoder(buf); err != nil {
 				return nil, buf, fmt.Errorf("cannot decode Array block count: %s", err)
 			}
 			blockCount := value.(int64)
@@ -41,7 +41,7 @@ func makeArrayCodec(st map[string]*Codec, enclosingNamespace string, schemaMap m
 					// NOTE: Negative block count means following long is the block size, for which
 					// we have no use.  Read its value and discard.
 					blockCount = -blockCount // convert to its positive equivalent
-					if _, buf, err = longDecoder(buf); err != nil {
+					if _, buf, err = longBinaryDecoder(buf); err != nil {
 						return nil, buf, fmt.Errorf("cannot decode Array block size: %s", err)
 					}
 				}
@@ -53,7 +53,7 @@ func makeArrayCodec(st map[string]*Codec, enclosingNamespace string, schemaMap m
 					arrayValues = append(arrayValues, value)
 				}
 				// Decode next blockCount from buffer, because there may be more blocks
-				if value, buf, err = longDecoder(buf); err != nil {
+				if value, buf, err = longBinaryDecoder(buf); err != nil {
 					return nil, buf, fmt.Errorf("cannot decode Array block count: %s", err)
 				}
 				blockCount = value.(int64)
@@ -82,14 +82,14 @@ func makeArrayCodec(st map[string]*Codec, enclosingNamespace string, schemaMap m
 				}
 			}
 			if len(arrayValues) > 0 {
-				buf, _ = longEncoder(buf, len(arrayValues))
+				buf, _ = longBinaryEncoder(buf, len(arrayValues))
 				for i, item := range arrayValues {
 					if buf, err = itemCodec.binaryEncoder(buf, item); err != nil {
 						return buf, fmt.Errorf("cannot encode Array item %d; %v: %s", i+1, item, err)
 					}
 				}
 			}
-			return longEncoder(buf, 0)
+			return longBinaryEncoder(buf, 0)
 		},
 	}, nil
 }

@@ -1,10 +1,48 @@
 package goavro_test
 
 import (
+	"fmt"
+	"strings"
 	"testing"
+
+	"github.com/karrick/goavro"
 )
 
-// NOTE: This file includes test cases that apply to more than one non-primitive data type.
+func testSchemaPrimativeCodec(t *testing.T, primitiveTypeName string) {
+	if _, err := goavro.NewCodec(primitiveTypeName); err != nil {
+		t.Errorf("Bare primitive type: Schema: %q; Actual: %#v; Expected: %#v", primitiveTypeName, err, nil)
+	}
+	quoted := `"` + primitiveTypeName + `"`
+	if _, err := goavro.NewCodec(quoted); err != nil {
+		t.Errorf("Bare primitive type: Schema: %q; Actual: %#v; Expected: %#v", quoted, err, nil)
+	}
+	full := fmt.Sprintf(`{"type":"%s"}`, primitiveTypeName)
+	if _, err := goavro.NewCodec(full); err != nil {
+		t.Errorf("Full primitive type: Schema: %q; Actual: %#v; Expected: %#v", full, err, nil)
+	}
+	extra := fmt.Sprintf(`{"type":"%s","ignoredKey":"ignoredValue"}`, primitiveTypeName)
+	if _, err := goavro.NewCodec(extra); err != nil {
+		t.Errorf("Full primitive type with extra attributes: Schema: %q; Actual: %#v; Expected: %#v", extra, err, nil)
+	}
+}
+
+func testSchemaInvalid(t *testing.T, schema, errorMessage string) {
+	_, err := goavro.NewCodec(schema)
+	if err == nil || !strings.Contains(err.Error(), errorMessage) {
+		t.Errorf("Actual: %v; Expected: %s", err, errorMessage)
+	}
+}
+
+func testSchemaValid(t *testing.T, schema string) {
+	_, err := goavro.NewCodec(schema)
+	if err != nil {
+		t.Errorf("Actual: %v; Expected: %v", err, nil)
+	}
+}
+
+func TestSchemaFailInvalidType(t *testing.T) {
+	testSchemaInvalid(t, `{"type":"flubber"}`, "unknown type name")
+}
 
 func TestSchemaWeather(t *testing.T) {
 	testSchemaValid(t, `

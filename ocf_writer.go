@@ -140,10 +140,10 @@ func (ocf *OCFWriter) Append(data []interface{}) error {
 	}
 
 	// create file data block
-	buf, _ := longEncoder(nil, len(data)) // block count (number of data items)
-	buf, _ = longEncoder(buf, len(block)) // block size (number of bytes in block)
-	buf = append(buf, block...)           // serialized objects
-	buf = append(buf, ocf.syncMarker...)  // sync marker
+	buf, _ := longBinaryEncoder(nil, len(data)) // block count (number of data items)
+	buf, _ = longBinaryEncoder(buf, len(block)) // block size (number of bytes in block)
+	buf = append(buf, block...)                 // serialized objects
+	buf = append(buf, ocf.syncMarker...)        // sync marker
 
 	_, err = ocf.iow.Write(buf)
 	return err

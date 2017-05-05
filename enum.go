@@ -38,7 +38,7 @@ func makeEnumCodec(st map[string]*Codec, enclosingNamespace string, schemaMap ma
 		var err error
 		var index int64
 
-		if value, buf, err = longDecoder(buf); err != nil {
+		if value, buf, err = longBinaryDecoder(buf); err != nil {
 			return nil, buf, fmt.Errorf("cannot decode Enum %q: index: %s", c.typeName, err)
 		}
 		index = value.(int64) // longDecoder always returns int64
@@ -54,7 +54,7 @@ func makeEnumCodec(st map[string]*Codec, enclosingNamespace string, schemaMap ma
 		}
 		for i, symbol := range symbols {
 			if symbol == someString {
-				return longEncoder(buf, i)
+				return longBinaryEncoder(buf, i)
 			}
 		}
 		return buf, fmt.Errorf("cannot encode Enum %q: value ought to be member of symbols: %v; %q", c.typeName, symbols, someString)

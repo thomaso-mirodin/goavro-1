@@ -22,7 +22,7 @@ func makeMapCodec(st map[string]*Codec, namespace string, schemaMap map[string]i
 			var err error
 			var value interface{}
 
-			if value, buf, err = longDecoder(buf); err != nil {
+			if value, buf, err = longBinaryDecoder(buf); err != nil {
 				return nil, buf, fmt.Errorf("cannot decode Map block count: %s", err)
 			}
 			blockCount := value.(int64)
@@ -41,14 +41,14 @@ func makeMapCodec(st map[string]*Codec, namespace string, schemaMap map[string]i
 					// NOTE: Negative block count means following long is the block size, for which
 					// we have no use.
 					blockCount = -blockCount // convert to its positive equivalent
-					if _, buf, err = longDecoder(buf); err != nil {
+					if _, buf, err = longBinaryDecoder(buf); err != nil {
 						return nil, buf, fmt.Errorf("cannot decode Map block size: %s", err)
 					}
 				}
 				// Decode `blockCount` datum values from buffer
 				for i := int64(0); i < blockCount; i++ {
 					// first decode the key string
-					if value, buf, err = stringDecoder(buf); err != nil {
+					if value, buf, err = stringBinaryDecoder(buf); err != nil {
 						return nil, buf, fmt.Errorf("cannot decode Map key: %s", err)
 					}
 					key := value.(string) // string decoder always returns a string
@@ -59,7 +59,7 @@ func makeMapCodec(st map[string]*Codec, namespace string, schemaMap map[string]i
 					mapValues[key] = value
 				}
 				// Decode next blockCount from buffer, because there may be more blocks
-				if value, buf, err = longDecoder(buf); err != nil {
+				if value, buf, err = longBinaryDecoder(buf); err != nil {
 					return nil, buf, fmt.Errorf("cannot decode Map block count: %s", err)
 				}
 				blockCount = value.(int64)
@@ -73,10 +73,10 @@ func makeMapCodec(st map[string]*Codec, namespace string, schemaMap map[string]i
 			}
 			if len(mapValues) > 0 {
 				// encode all map key-value pairs into a single block
-				buf, _ = longEncoder(buf, len(mapValues))
+				buf, _ = longBinaryEncoder(buf, len(mapValues))
 				for k, v := range mapValues {
 					// stringEncoder only fails when given non string, so elide error checking
-					buf, _ = stringEncoder(buf, k)
+					buf, _ = stringBinaryEncoder(buf, k)
 					// encode the pair value
 					if buf, err = valueCodec.binaryEncoder(buf, v); err != nil {
 						return buf, fmt.Errorf("cannot encode Map value for key %q: %v: %s", k, v, err)
@@ -84,7 +84,7 @@ func makeMapCodec(st map[string]*Codec, namespace string, schemaMap map[string]i
 				}
 			}
 			// always end with final blockCount of 0
-			return longEncoder(buf, 0)
+			return longBinaryEncoder(buf, 0)
 		},
 	}, nil
 }

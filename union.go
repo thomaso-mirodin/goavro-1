@@ -42,7 +42,7 @@ func buildCodecForTypeDescribedBySlice(st map[string]*Codec, enclosingNamespace 
 			var decoded interface{}
 			var err error
 
-			decoded, buf, err = longDecoder(buf)
+			decoded, buf, err = longBinaryDecoder(buf)
 			if err != nil {
 				return nil, buf, err
 			}
@@ -67,7 +67,7 @@ func buildCodecForTypeDescribedBySlice(st map[string]*Codec, enclosingNamespace 
 				if !ok {
 					return buf, fmt.Errorf("cannot encode Union: no member schema types support datum: allowed types: %v; received: %T", allowedTypes, datum)
 				}
-				return longEncoder(buf, index)
+				return longBinaryEncoder(buf, index)
 			case map[string]interface{}:
 				if len(v) != 1 {
 					return buf, fmt.Errorf("cannot encode Union: non-nil values ought to be specified with Go map[string]interface{}, with single key equal to type name, and value equal to datum value: %v; received: %T", allowedTypes, datum)
@@ -79,7 +79,7 @@ func buildCodecForTypeDescribedBySlice(st map[string]*Codec, enclosingNamespace 
 						return buf, fmt.Errorf("cannot encode Union: no member schema types support datum: allowed types: %v; received: %T", allowedTypes, datum)
 					}
 					c := codecFromIndex[index]
-					buf, _ = longEncoder(buf, index)
+					buf, _ = longBinaryEncoder(buf, index)
 					return c.binaryEncoder(buf, value)
 				}
 			}
