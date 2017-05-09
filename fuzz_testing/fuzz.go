@@ -7,7 +7,8 @@ import (
 )
 
 func init() {
-	goavro.MaxAllocationSize = 100 * 1024 * 1024
+	goavro.MaxBlockSize = 10 * 1024 * 1024
+	goavro.MaxBlockCount = 1024
 }
 
 func Fuzz(data []byte) int {
