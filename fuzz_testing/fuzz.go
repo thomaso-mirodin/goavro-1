@@ -2,6 +2,7 @@ package goavro
 
 import (
 	"bytes"
+	"fmt"
 
 	"github.com/karrick/goavro"
 )
@@ -11,7 +12,16 @@ func init() {
 	goavro.MaxBlockCount = 1024
 }
 
-func Fuzz(data []byte) int {
+func Fuzz_NewCodec(data []byte) int {
+	codec, err := goavro.NewCodec(string(data))
+	if err != nil {
+		return 0
+	}
+
+	return 1
+}
+
+func Fuzz_e2e(data []byte) int {
 	ocfr, err := goavro.NewOCFReader(bytes.NewReader(data))
 	if err != nil {
 		return 0
@@ -29,9 +39,15 @@ func Fuzz(data []byte) int {
 	b := new(bytes.Buffer)
 	ocfw, err := goavro.NewOCFWriter(
 		goavro.OCFWriterConfig{
-			W:      b,
-			Schema: ocfr.Schema(),
+			W:           b,
+			Compression: goavro.CompressionNull,
+			Schema:      ocfr.Schema(),
 		})
+	if err != nil {
+		fmt.Println("failed to create ocf writer")
+		panic(err)
+	}
+
 	if err := ocfw.Append(datums); err != nil {
 		panic(err)
 	}
