@@ -1,4 +1,4 @@
-package goavro
+package e2e
 
 import (
 	"bytes"
@@ -12,7 +12,7 @@ func init() {
 	goavro.MaxBlockCount = 1024
 }
 
-func Fuzz_e2e(data []byte) int {
+func Fuzz(data []byte) int {
 	ocfr, err := goavro.NewOCFReader(bytes.NewReader(data))
 	if err != nil {
 		return 0
