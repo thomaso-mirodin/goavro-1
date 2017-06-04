@@ -12,15 +12,6 @@ func init() {
 	goavro.MaxBlockCount = 1024
 }
 
-func Fuzz_NewCodec(data []byte) int {
-	codec, err := goavro.NewCodec(string(data))
-	if err != nil {
-		return 0
-	}
-
-	return 1
-}
-
 func Fuzz_e2e(data []byte) int {
 	ocfr, err := goavro.NewOCFReader(bytes.NewReader(data))
 	if err != nil {
