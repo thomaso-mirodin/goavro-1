@@ -31,7 +31,7 @@ func Fuzz(data []byte) int {
 	ocfw, err := goavro.NewOCFWriter(
 		goavro.OCFWriterConfig{
 			W:           b,
-			Compression: goavro.CompressionNull,
+			Compression: ocfr.CompressionID(),
 			Schema:      ocfr.Schema(),
 		})
 	if err != nil {
