@@ -1,12 +1,12 @@
-package goavro
+package goavro_test
 
 import (
-	"bytes"
-	"strings"
 	"testing"
+
+	"github.com/karrick/goavro/fuzz_testing/e2e"
 )
 
-func TestCrashers_OCFReader(t *testing.T) {
+func TestCrashers_OCF_e2e(t *testing.T) {
 	var crashers = map[string]string{
 		"scan: negative block sizes": "Obj\x01\x04\x16avro.schema\x96\x05{" +
 			"\"type\":\"record\",\"nam" +
@@ -28,16 +28,6 @@ func TestCrashers_OCFReader(t *testing.T) {
 			"00000000\"}\x14000000000" +
 			"0\b0000\x000000000000000" +
 			"0000\xd90",
-	}
-
-	for testName, f := range crashers {
-		t.Logf("Testing: %s", testName)
-		NewOCFReader(strings.NewReader(f))
-	}
-}
-
-func TestCrashers_OCF_e2e(t *testing.T) {
-	var crashers = map[string]string{
 		"map: initialSize overflow": "Obj\x01\x04\x14avro.codec\bnul" +
 			"l\x16avro.schema\xa2\x0e{\"typ" +
 			"e\":\"record\",\"name\":\"" +
@@ -372,33 +362,9 @@ func TestCrashers_OCF_e2e(t *testing.T) {
 			"\xd5/\xff\x0f\x90\xfb\x1eO%\x06%B\x03\x00s\x0f(\x89\x02\a",
 	}
 
-	for testName, f := range crashers {
+	for testName, data := range crashers {
 		t.Logf("Testing: %s", testName)
 
-		// TODO: replace this with a call out to the e2e Fuzz function
-		ocfr, err := NewOCFReader(strings.NewReader(f))
-		if err != nil {
-			continue
-		}
-
-		var datums []interface{}
-		for ocfr.Scan() {
-			if datum, err := ocfr.Read(); err == nil {
-				datums = append(datums, datum)
-			}
-		}
-
-		b := new(bytes.Buffer)
-		ocfw, err := NewOCFWriter(
-			OCFConfig{
-				W:      b,
-				Schema: ocfr.Codec().Schema(),
-			})
-		if err != nil {
-			panic(err)
-		}
-		if err := ocfw.Append(datums); err != nil {
-			panic(err)
-		}
+		e2e.Fuzz([]byte(data))
 	}
 }
