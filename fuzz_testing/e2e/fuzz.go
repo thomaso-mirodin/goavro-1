@@ -29,10 +29,10 @@ func Fuzz(data []byte) int {
 
 	b := new(bytes.Buffer)
 	ocfw, err := goavro.NewOCFWriter(
-		goavro.OCFWriterConfig{
-			W:           b,
-			Compression: ocfr.CompressionID(),
-			Schema:      ocfr.Schema(),
+		goavro.OCFConfig{
+			W:               b,
+			CompressionName: ocfr.CompressionName(),
+			Schema:          ocfr.Codec().Schema(),
 		})
 	if err != nil {
 		fmt.Println("failed to create ocf writer")
